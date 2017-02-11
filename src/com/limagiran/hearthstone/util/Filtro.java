@@ -1,10 +1,8 @@
 package com.limagiran.hearthstone.util;
 
-import com.limagiran.hearthstone.card.control.Card;
 import static com.limagiran.hearthstone.util.Utils.reflection;
 import java.util.ArrayList;
 import java.util.List;
-import static com.limagiran.hearthstone.util.Utils.reflection;
 
 /**
  *
@@ -20,10 +18,8 @@ public class Filtro {
      */
     public static List excluirFurtivoEImune(List cards) {
         List retorno = new ArrayList<>();
-        cards.stream().filter((c) -> (!reflection(Boolean.class, c, "isImuneAlvo")
-                && !reflection(Boolean.class, c, "isFurtivo"))).forEach((c) -> {
-            retorno.add(c);
-        });
+        cards.stream().filter(c -> (!reflection(Boolean.class, c, "isImuneAlvo")
+                && !reflection(Boolean.class, c, "isFurtivo"))).forEach(retorno::add);
         return retorno;
     }
 
@@ -37,10 +33,7 @@ public class Filtro {
      */
     public static List lacaiosComXOuMenosDeAtaque(List lacaios, int ataque) {
         List retorno = new ArrayList<>();
-        lacaios.stream().filter((c) -> (reflection(Integer.class, c, "getAtaque") <= ataque))
-                .forEach((lacaio) -> {
-                    retorno.add(lacaio);
-                });
+        lacaios.stream().filter(c -> (reflection(Integer.class, c, "getAtaque") <= ataque)).forEach(retorno::add);
         return retorno;
     }
 
@@ -54,10 +47,7 @@ public class Filtro {
      */
     public static List lacaiosComXOuMaisDeAtaque(List lacaios, int ataque) {
         List retorno = new ArrayList<>();
-        lacaios.stream().filter((c) -> (reflection(Integer.class, c, "getAtaque") >= ataque))
-                .forEach((lacaio) -> {
-                    retorno.add(lacaio);
-                });
+        lacaios.stream().filter((c) -> (reflection(Integer.class, c, "getAtaque") >= ataque)).forEach(retorno::add);
         return retorno;
     }
 
@@ -71,10 +61,7 @@ public class Filtro {
      */
     public static List lacaiosComXOuMaisDeAtaqueSemAura(List lacaios, int ataque) {
         List retorno = new ArrayList<>();
-        lacaios.stream().filter((c) -> (reflection(Integer.class, c, "getAtaqueSemAura") >= ataque))
-                .forEach((lacaio) -> {
-                    retorno.add(lacaio);
-                });
+        lacaios.stream().filter(c -> (reflection(Integer.class, c, "getAtaqueSemAura") >= ataque)).forEach(retorno::add);
         return retorno;
     }
 
@@ -87,11 +74,9 @@ public class Filtro {
      */
     public static List raca(List lacaios, String race) {
         List retorno = new ArrayList<>();
-        lacaios.stream().filter((c) -> (reflection(String.class, c, "getRace") != null
+        lacaios.stream().filter(c -> (reflection(String.class, c, "getRace") != null
                 && reflection(String.class, c, "getRace").equals(race)))
-                .forEach((c) -> {
-                    retorno.add(c);
-                });
+                .forEach(retorno::add);
         return retorno;
     }
 
@@ -103,10 +88,7 @@ public class Filtro {
      */
     public static List segredo(List cards) {
         List retorno = new ArrayList<>();
-        cards.stream().filter((c) -> (reflection(Boolean.class, c, "isSegredo")))
-                .forEach((c) -> {
-                    retorno.add(c);
-                });
+        cards.stream().filter(c -> (reflection(Boolean.class, c, "isSegredo"))).forEach(retorno::add);
         return retorno;
     }
 
@@ -119,10 +101,7 @@ public class Filtro {
      */
     public static List custo(List cards, int custo) {
         List retorno = new ArrayList<>();
-        cards.stream().filter((c) -> (reflection(Integer.class, c, "getCost") == custo))
-                .forEach((c) -> {
-                    retorno.add(c);
-                });
+        cards.stream().filter(c -> (reflection(Integer.class, c, "getCost") == custo)).forEach(retorno::add);
         return retorno;
     }
 
@@ -134,10 +113,7 @@ public class Filtro {
      */
     public static List lacaio(List cards) {
         List retorno = new ArrayList<>();
-        cards.stream().filter((c) -> (reflection(Boolean.class, c, "isLacaio")))
-                .forEach((c) -> {
-                    retorno.add(c);
-                });
+        cards.stream().filter(c -> (reflection(Boolean.class, c, "isLacaio"))).forEach(retorno::add);
         return retorno;
     }
 }
