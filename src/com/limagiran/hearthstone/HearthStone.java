@@ -44,7 +44,21 @@ public class HearthStone {
             //verifica se tem nova versão do programa disponível
             //se sim, pergunta se deseja atualizar a nova versão
             //e depois inicia a janela principal
-            Update.checkVersion(HearthStone::start, () -> Update.askUpdate(HearthStone::start));
+            Update.checkVersion(new Update.CheckVersionListener() {
+                @Override
+                public void check(boolean check) {
+                    if (!check) {
+                        Update.askUpdate(HearthStone::start);
+                    } else {
+                        start();
+                    }
+                }
+
+                @Override
+                public void offline() {
+                    start();
+                }
+            });
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "ERRO! Reinicie o programa!\n" + e.getMessage());

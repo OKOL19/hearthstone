@@ -1508,11 +1508,23 @@ public class Colecao extends JFrame {
         if (!validateServer()) {
             return;
         }
-        Update.checkVersion(
-                () -> connect(server, port),
-                () -> {
+        Update.checkVersion(new Update.CheckVersionListener() {
+            @Override
+            public void check(boolean check) {
+                if (check) {
+                    connect(server, port);
+                } else {
                     Utils.error("É necessário utilizar a versão mais recente para jogar Player vs Player");
                     Update.askUpdate(""::toString);
-                });
+                }
+            }
+
+            @Override
+            public void offline() {
+                if (Utils.confirm("Não foi possível identificar a versão do programa. Deseja continuar?")) {
+                    connect(server, port);
+                }
+            }
+        });
     }
 }

@@ -189,15 +189,14 @@ public class Update {
     /**
      * Verifica se a versão do programa é a mais recente
      *
-     * @param ifTrue ação executada se for {@code true}
-     * @param ifFalse ação executada se for {@code false}
+     * @param listener
      */
-    public static void checkVersion(Runnable ifTrue, Runnable ifFalse) {
+    public static void checkVersion(CheckVersionListener listener) {
         getCurrentVersion(v -> {
-            if ((v == null) || !v.equals(VERSION)) {
-                ifFalse.run();
+            if (v == null) {
+                listener.offline();
             } else {
-                ifTrue.run();
+                listener.check(v.equals(VERSION));
             }
         });
     }
@@ -205,9 +204,9 @@ public class Update {
     /**
      * Exibe uma caixa de diálogo para atualizar a versão do programa
      *
-     * @param ifFalse
+     * @param ifFalseOrError
      */
-    public static void askUpdate(Runnable ifFalse) {
+    public static void askUpdate(Runnable ifFalseOrError) {
         if (Utils.confirm("Versão do programa desatualizada, deseja atualizar?", "Atualizar")) {
             PopUpWorker.exe(new PopUpWorker.MySwingWorker(null) {
                 private File fileDownload;
@@ -229,14 +228,16 @@ public class Update {
                             System.exit(0);
                         } catch (Exception ex) {
                             Utils.error("Erro ao abrir nova instância");
+                            ifFalseOrError.run();
                         }
                     } else {
                         showResult();
+                        ifFalseOrError.run();
                     }
                 }
             }, true);
         } else {
-            ifFalse.run();
+            ifFalseOrError.run();
         }
     }
 
@@ -313,6 +314,13 @@ public class Update {
                 System.exit(0);
             }
         }, true);
+    }
+
+    public static interface CheckVersionListener {
+
+        void check(boolean check);
+
+        void offline();
     }
 
 }
