@@ -1,6 +1,8 @@
 # hearthstone
 Hearthstone Java - Open Source
 
+[**Download Jar**](https://github.com/limagiran/hearthstone/raw/master/release/HearthStone.jar)
+
 Projeto desenvolvido a fim de aprendizado, experiência e desafio.
 
 A última atualização foi em 02/2016, ou seja, há muitas cartas novas atualmente no HearthStone original que não foram implementadas.
