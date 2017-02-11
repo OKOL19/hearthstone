@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Collections;
 
@@ -79,20 +80,22 @@ public class GameCliente implements Runnable {
             GamePlay.INSTANCE.setVidaTotalHeroi(pacote.getParamInt(Param.VIDA_TOTAL_HEROI));
             GamePlay.INSTANCE.setCartasNaMao(pacote.getParamInt(Param.CARTAS_NA_MAO));
             GamePlay.INSTANCE.setShieldInicial(pacote.getParamInt(Param.SHIELD_INICIAL));
-            heroi.setShield(GamePlay.INSTANCE.getShieldInicial(), false);
-            heroi.setVidaTotal(GamePlay.INSTANCE.getVidaTotalHeroi(), false);
+            Arrays.asList(heroi, oponente).forEach(h -> {
+                h.setShield(GamePlay.INSTANCE.getShieldInicial(), false);
+                h.setVidaTotal(GamePlay.INSTANCE.getVidaTotalHeroi(), false);
+            });
             //enviar as informações do herói
             enviarHeroi();
             //capturar as informações do oponente recebido pelo servidor
             while (oponente == null && onLine) {
-                Thread.sleep(25);
+                Utils.sleep(25);
             }
             //inicia a partidaView            
             (partidaView = PartidaView.main(new Partida(player, playerInicio,
                     heroi, oponente), playerInicio == player)).start();
             //aguarda o deck muligado do oponente ser recebido pela rede
             while (!deck && onLine) {
-                Thread.sleep(25);
+                Utils.sleep(25);
             }
             partidaView.setMuligado(true);
             while (onLine) {

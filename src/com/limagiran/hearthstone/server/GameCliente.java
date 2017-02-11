@@ -15,6 +15,7 @@ import com.limagiran.hearthstone.util.JsonUtils;
 import com.limagiran.hearthstone.partida.control.*;
 import com.limagiran.hearthstone.partida.view.*;
 import com.limagiran.hearthstone.util.*;
+import java.util.Arrays;
 
 /**
  *
@@ -150,8 +151,10 @@ public class GameCliente implements Runnable, Param {
             GamePlay.INSTANCE.setVidaTotalHeroi(packStart.getParamInt(VIDA_TOTAL_HEROI));
             GamePlay.INSTANCE.setCartasNaMao(packStart.getParamInt(CARTAS_NA_MAO));
             GamePlay.INSTANCE.setShieldInicial(packStart.getParamInt(SHIELD_INICIAL));
-            heroi.setShield(GamePlay.INSTANCE.getShieldInicial(), false);
-            heroi.setVidaTotal(GamePlay.INSTANCE.getVidaTotalHeroi(), false);
+            Arrays.asList(heroi, oponente).forEach(h -> {
+                h.setShield(GamePlay.INSTANCE.getShieldInicial(), false);
+                h.setVidaTotal(GamePlay.INSTANCE.getVidaTotalHeroi(), false);
+            });
             //enviar as informações do herói
             SwingUtils.runOnUIThread(() -> {
                 Partida partida = new Partida(player, playerInicio, heroi, oponente);
