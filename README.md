@@ -34,9 +34,6 @@ Dinâmica do jogo
  - Para realizar uma jogada clique com o mouse num card/lacaio/etc, arraste o mouse e solte no destino da ação, assim como é feito no jogo original.
  - Não é necessário aguardar o término da animação/execução de uma jogada para realizar outra, elas irão se acumulando.
  - Para jogar cards com ações como Grito de Guerra, arraste o card para a mesa normalmente. Após soltar o card na mesa o cursor do mouse ficará no formato de um alvo &oplus; para escolher um alvo.<br>Clique com o botão direito para confirmar a ação; digite ESC ou clique com o botão esquerdo para cancelar a ação.
- 
-
-Contato: [Facebook](https://www.facebook.com/vini.lima.ti)
 
 Screenshots
 ----------
