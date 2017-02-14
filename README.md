@@ -1,6 +1,9 @@
 # hearthstone
 Hearthstone Java - Open Source
 
+Blizzard Entertainment®<br>
+Blizzard Entertainment é uma marca ou uma marca registrada da Blizzard Entertainment, Inc. nos E.U.A e/ou em outros países. Todos os direitos reservados.
+
 [**Download Jar**](https://github.com/limagiran/hearthstone/raw/master/release/HearthStone.jar)
 
 Projeto desenvolvido a fim de aprendizado, experiência e desafio.
