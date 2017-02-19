@@ -1,24 +1,16 @@
 package com.limagiran.hearthstoneia.server;
 
+import static com.limagiran.hearthstone.HearthStone.CARTAS;
 import com.limagiran.hearthstoneia.card.control.Card;
 import com.limagiran.hearthstoneia.Utils;
 import com.limagiran.hearthstoneia.heroi.control.Heroi;
-import com.limagiran.hearthstone.util.JsonUtils;
-import static com.limagiran.hearthstone.HearthStone.CARTAS;
 import com.limagiran.hearthstone.partida.control.Pacote;
-import com.limagiran.hearthstoneia.partida.control.Partida;
-import com.limagiran.hearthstoneia.partida.control.Sincronizar;
+import com.limagiran.hearthstoneia.partida.control.*;
 import com.limagiran.hearthstoneia.partida.view.PartidaView;
-import com.limagiran.hearthstone.util.GamePlay;
-import com.limagiran.hearthstone.util.Param;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import com.limagiran.hearthstone.util.*;
+import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Collections;
+import java.util.*;
 
 /**
  *
@@ -26,8 +18,6 @@ import java.util.Collections;
  */
 public class GameCliente implements Runnable {
 
-    //public static final StringBuilder ENVIAR = new StringBuilder();
-    //public static final String DELIMITADOR = "#@!";
     private static Socket server;
     private static PrintStream saida;
     private static BufferedReader entrada;
@@ -35,7 +25,6 @@ public class GameCliente implements Runnable {
     public Heroi heroi;
     public Heroi oponente = null;
     public static boolean onLine = false;
-    private boolean deck = false;
     private static final List<String> PACK_IN = Collections.synchronizedList(new ArrayList<String>());
     private static final List<String> PACK_OUT = Collections.synchronizedList(new ArrayList<String>());
     private static boolean podeEnviar;
@@ -72,37 +61,45 @@ public class GameCliente implements Runnable {
     @Override
     public void run() {
         try {
-            Pacote pacote = JsonUtils.toObject(entrada.readLine());
-            pacoteOponente();
+            Pacote packStart = JsonUtils.toObject(entrada.readLine());
+            enviarHeroi();
+            Pacote packOpponent = JsonUtils.toObject(entrada.readLine());
+            oponente = getOponente(packOpponent);
+            new Thread(() -> start(packStart)).start();
+        } catch (Exception e) {
+            close();
+        }
+    }
+
+    public void start(Pacote pack) {
+        try {
+            iniciarThreadEnviarPacotes();
+            iniciarThreadReceberPacotes();
+
             //capturando valores do pacote inicial
-            int playerInicio = pacote.getParamInt(Param.PLAYER_INICIO);
-            int player = pacote.getParamInt(Param.PLAYER);
-            GamePlay.INSTANCE.setVidaTotalHeroi(pacote.getParamInt(Param.VIDA_TOTAL_HEROI));
-            GamePlay.INSTANCE.setCartasNaMao(pacote.getParamInt(Param.CARTAS_NA_MAO));
-            GamePlay.INSTANCE.setShieldInicial(pacote.getParamInt(Param.SHIELD_INICIAL));
+            int playerInicio = pack.getParamInt(Param.PLAYER_INICIO);
+            int player = pack.getParamInt(Param.PLAYER);
+            GamePlay.INSTANCE.setVidaTotalHeroi(pack.getParamInt(Param.VIDA_TOTAL_HEROI));
+            GamePlay.INSTANCE.setCartasNaMao(pack.getParamInt(Param.CARTAS_NA_MAO));
+            GamePlay.INSTANCE.setShieldInicial(pack.getParamInt(Param.SHIELD_INICIAL));
             Arrays.asList(heroi, oponente).forEach(h -> {
                 h.setShield(GamePlay.INSTANCE.getShieldInicial(), false);
                 h.setVidaTotal(GamePlay.INSTANCE.getVidaTotalHeroi(), false);
             });
             //enviar as informações do herói
             enviarHeroi();
-            //capturar as informações do oponente recebido pelo servidor
-            while (oponente == null && onLine) {
-                Utils.sleep(25);
-            }
             //inicia a partidaView            
             (partidaView = PartidaView.main(new Partida(player, playerInicio,
                     heroi, oponente), playerInicio == player)).start();
             //aguarda o deck muligado do oponente ser recebido pela rede
-            while (!deck && onLine) {
-                Utils.sleep(25);
-            }
+            partidaView.PARTIDA.getOponente().setDeck(getDeck(JsonUtils.toObject(entrada.readLine())));
             partidaView.setMuligado(true);
             while (onLine) {
                 String pacotes = entrada.readLine();
                 PACK_IN.add(pacotes);
             }
         } catch (Exception ex) {
+            close();
             onLine = false;
         }
     }
@@ -134,7 +131,7 @@ public class GameCliente implements Runnable {
         pacote.set(Param.CARD_JUSTAS_OPONENTE, idHeroi);
         GameCliente.enviar(pacote);
     }
-    
+
     public static void exibirSegredoRevelado(String id, long heroi) {
         Pacote pacote = new Pacote(Param.ANIMACAO_CARD_SEGREDO_REVELADO);
         pacote.set(Param.CARD_ID, id);
@@ -288,40 +285,7 @@ public class GameCliente implements Runnable {
             }
         }).start();
     }
-
-    private void pacoteDeck() {
-        new Thread(() -> {
-            try {
-                Pacote pacote = JsonUtils.toObject(entrada.readLine());
-                while (partidaView == null || partidaView.PARTIDA == null) {
-                    Utils.sleep(50);
-                }
-                partidaView.PARTIDA.getOponente().setDeck(getDeck(pacote));
-                iniciarThreadEnviarPacotes();
-                iniciarThreadReceberPacotes();
-                deck = true;
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                onLine = false;
-            }
-        }).start();
-    }
-
-    private void pacoteOponente() {
-        new Thread(() -> {
-            try {
-                //aguardar o próximo pacote com as informações do oponente
-                Pacote pacote = JsonUtils.toObject(entrada.readLine());
-                //capturar as informações do oponente recebido pelo servidor
-                oponente = getOponente(pacote);
-                pacoteDeck();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                onLine = false;
-            }
-        }).start();
-    }
-
+    
     private void iniciarThreadEnviarPacotes() {
         PACK_OUT.clear();
         new Thread(() -> {
@@ -362,5 +326,4 @@ public class GameCliente implements Runnable {
             partidaView.PARTIDA.addHistorico(string);
         }
     }
-
 }
